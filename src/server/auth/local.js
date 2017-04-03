@@ -1,57 +1,24 @@
-const bcrypt = require('bcryptjs');
-const knex = require('../db/connection');
-const localAuth = require('./local');
+const moment = require('moment');
+const jwt = require('jwt-simple');
 
-function createUser(req) {
-  const salt = bcrypt.genSaltSync();
-  const hash = bcrypt.hashSync(req.body.password, salt);
-  return knex('regulator_users')
-  .insert({
-    username: req.body.username,
-    password: hash
-  })
-  .returning('*');
+function encodeToken(user) {
+  const playload = {
+    exp: moment().add(14, 'days').unix(),
+    iat: moment().unix(),
+    sub: user.id
+  };
+  return jwt.encode(playload, process.env.TOKEN_SECRET);
 }
 
-function getUser(username) {
-  return knex('regulator_users').where({username}).first();
-}
-
-function comparePass(userPassword, databasePassword) {
-  return bcrypt.compareSync(userPassword, databasePassword);
-}
-
-function ensureAuthenticated(req, res, next) {
-  if (!(req.headers && req.headers.authorization)) {
-    return res.status(400).json({
-      status: 'Please log in'
-    });
-  }
-  // decode the token
-  const header = req.headers.authorization.split(' ');
-  const token = header[1];
-  localAuth.decodeToken(token, (err, payload) => {
-    if (err) {
-      return res.status(401).json({
-        status: 'Token has expired'
-      });
-    } else {
-      return knex('regulator_users').where({id: parseInt(payload.sub)}).first()
-      .then((user) => {
-        return next();
-      })
-      .catch((err) => {
-        res.status(500).json({
-          status: 'error'
-        });
-      });
-    }
-  });
+function decodeToken(token, callback) {
+  const payload = jwt.decode(token, process.env.TOKEN_SECRET);
+  const now = moment().unix();
+  // check if the token has expired
+  if (now > payload.exp) callback('Token has expired.');
+  else callback(null, payload);
 }
 
 module.exports = {
-  createUser,
-  getUser,
-  comparePass,
-  ensureAuthenticated
+  encodeToken,
+  decodeToken
 };
