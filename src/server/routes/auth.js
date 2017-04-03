@@ -7,10 +7,12 @@ const knex = require('../db/connection');
 
 
 router.post('/register', (req, res, next)  => {
+  console.log(req.body);
   return authHelpers.createUser(req, res)
   .then((user) => { return localAuth.encodeToken(user[0]); })
   .then((token) => {
     res.status(200).json({
+      username: req.body.username,
       status: 'success',
       token: token
     });
@@ -27,12 +29,19 @@ router.post('/login', (req, res, next) => {
   const password = req.body.password;
   return authHelpers.getUser(username)
   .then((response) => {
-    authHelpers.comparePass(password, response.password);
-    return response;
+    console.log(authHelpers.comparePass(password, response.password))
+    if (authHelpers.comparePass(password, response.password)) {
+      return response;
+    } else {
+      res.status(200).json({
+        status: 'error'
+      });
+    }
   })
   .then((response) => { return localAuth.encodeToken(response); })
   .then((token) => {
     res.status(200).json({
+      username: req.body.username,
       status: 'success',
       token: token
     });
