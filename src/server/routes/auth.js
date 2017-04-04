@@ -29,16 +29,17 @@ router.post('/login', (req, res, next) => {
   const password = req.body.password;
   return authHelpers.getUser(username)
   .then((response) => {
-    console.log(authHelpers.comparePass(password, response.password))
     if (authHelpers.comparePass(password, response.password)) {
       return response;
     } else {
-      res.status(200).json({
-        status: 'error'
-      });
+      throw new Error('abort promise');
+      return null;
     }
   })
-  .then((response) => { return localAuth.encodeToken(response); })
+  .then((response) => {
+    // console.log(localAuth.encodeToken(response))
+    return localAuth.encodeToken(response);
+  })
   .then((token) => {
     res.status(200).json({
       username: req.body.username,
@@ -47,9 +48,16 @@ router.post('/login', (req, res, next) => {
     });
   })
   .catch((err) => {
-    res.status(500).json({
-      status: 'error'
-    });
+    if (err.message === 'abort promise') {
+      res.status(200).json({
+        status: 'error'
+      });
+    } else {
+      res.status(500).json({
+        status: 'error'
+      });
+    }
+
   });
 });
 
@@ -60,6 +68,12 @@ router.get('/user',
     status: 'success'
   });
 });
+
+router.get('/usercheck', authHelpers.ensureAuthenticatedCustom, (req, res, next) => {
+  res.status(200).json({
+    status: 'success'
+  });
+})
 
 router.get('/userinfo', (req, res, next) => {
   const header = req.headers.authorization.split(' ');
