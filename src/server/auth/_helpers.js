@@ -51,7 +51,6 @@ function ensureAuthenticated(req, res, next) {
 }
 
 function ensureAuthenticatedCustom(req, res, next) {
-  console.log(req.body)
   let token = req.query.token
   localAuth.decodeToken(token, (err, payload) => {
     if (err) {
