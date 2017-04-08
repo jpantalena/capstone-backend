@@ -4,7 +4,8 @@
   "description": "Node.js backend built on Express - Jack Pantalena Capstone Project",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ./src/server/bin/www",
+    "start": "node ./src/server/bin/www",
+    "startdev": "nodemon ./src/server/bin/www",
     "test": "./node_modules/mocha/bin/_mocha"
   },
   "dependencies": {
