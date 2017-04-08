@@ -8,6 +8,10 @@ router.get('/', function (req, res, next) {
   res.send('What Up')
 });
 
+router.get('/test', function (req, res, next) {
+  res.send('This is a test')
+});
+
 router.post('/tab', (req, res, next)  => {
   var arr = Object.entries(req.body);
   var token = req.body.token;
