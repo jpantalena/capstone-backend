@@ -7,7 +7,6 @@ const knex = require('../db/connection');
 
 
 router.post('/register', (req, res, next)  => {
-  console.log(req.body);
   return authHelpers.createUser(req, res)
   .then((user) => { return localAuth.encodeToken(user[0]); })
   .then((token) => {
