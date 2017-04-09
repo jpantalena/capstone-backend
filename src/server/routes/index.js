@@ -3,6 +3,7 @@ const router = express.Router();
 const knex = require('../db/connection');
 const localAuth = require('../auth/local');
 const uuidV4 = require('uuid/v4');
+const entries = require('object.entries');
 
 router.get('/', function (req, res, next) {
   res.send('What Up')
@@ -13,7 +14,7 @@ router.get('/test', function (req, res, next) {
 });
 
 router.post('/tab', (req, res, next)  => {
-  var arr = Object.entries(req.body);
+  var arr = entries(req.body);
   var token = req.body.token;
   var user_id = null;
   arr.pop();
